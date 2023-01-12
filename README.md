@@ -18,10 +18,7 @@ Installation
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the dependencies.
 
 
-`pip install fastapi
-pip install pillow
-pip install requests
-pip install captchasolver`
+`pip install -r requirements.txt`
 
 Usage
 -----
