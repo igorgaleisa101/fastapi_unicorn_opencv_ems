@@ -8,8 +8,9 @@ Prerequisites
 
 -   Python 3.6+
 -   FastAPI
--   PIL
+-   Pillow
 -   requests
+-   numpy
 
 
 Installation
@@ -30,12 +31,7 @@ To run the API on your local machine, use the following command:
 
 This will run the API on `http://localhost:8000/`
 
-Make a `POST` request to `http://localhost:8000/track` with json data
-
-
-`{
-    "tracking_number":"LY932726434CN"
-}`
+Make a `GET` request to `http://localhost:8000/ems/track?tracking_number={tracking_number}`
 
 Deployment
 ----------
