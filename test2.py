@@ -1,6 +1,6 @@
 import requests
 import time
-
+from requests_ntlm import HttpNtlmAuth
 import random
 
 
@@ -17,7 +17,8 @@ proxy_userpwd = "lum-customer-osoyoo-zone-static-session-{}:sqtmcnel76x9".format
 s = requests.session()
 s.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
 s.proxies = proxy
-s.auth = requests.auth.HTTPBasicAuth(proxy_userpwd.split(':')[0], proxy_userpwd.split(':')[1])
+s.auth = HttpNtlmAuth(proxy_userpwd.split(':')[0], proxy_userpwd.split(':')[1])
+# s.auth = requests.auth.HTTPBasicAuth(proxy_userpwd.split(':')[0], proxy_userpwd.split(':')[1])
 r = s.get("https://api.myip.com/")
 
 
