@@ -30,7 +30,7 @@ print("sessionid=", id)
 proxy = 'http://zproxy.lum-superproxy.io:22225'
 proxy_userpwd = "lum-customer-osoyoo-zone-static-session-{id}:sqtmcnel76x9".format(id=id)
 
-url = "http://www.geoplugin.net/json.gp"
+url = "https://api.myip.com/"
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
 }
