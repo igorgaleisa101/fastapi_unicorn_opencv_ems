@@ -81,6 +81,19 @@ Then we restart the Nginx service.
 Now we can start our uvicorn server to check if our application is working or not.
 `gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:80`
 
+Using Docker
+------------
+
+Install Docker
+
+https://docs.docker.com/engine/install/ubuntu/
+
+`docker-compose up -d`
+
+`docker images`
+
+`docker ps`
+
 
 
 API Endpoint
