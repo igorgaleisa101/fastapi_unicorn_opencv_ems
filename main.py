@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from EMS.ems_tracking_service import EMSTrackingService
 from starlette.requests import Request
+from access import WHITELIST
 # from mangum import Mangum
 
 
@@ -25,6 +26,11 @@ async def track_ems(tracking_number: str, proxy: int = 0, session: int = 0):
 
 @app.get("/test")
 async def test(request: Request, proxy: int = 0, session: int = 0):
+
+    # Check access
+    if not request.client.host in WHITELIST:
+        return {'success': False, 'msg': 'Access Denied!'}
+
     ems_service = EMSTrackingService(proxy=proxy, session_id=session)
     result = ems_service.test_request()
     result['this'] = request.client.host
