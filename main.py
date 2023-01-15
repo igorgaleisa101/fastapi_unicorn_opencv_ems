@@ -29,9 +29,9 @@ async def test(request: Request, proxy: int = 0, session: int = 0):
 
     # Check access
     if not request.client.host in WHITELIST:
-        return {'success': False, 'msg': 'Access Denied!'}
+        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
 
     ems_service = EMSTrackingService(proxy=proxy, session_id=session)
     result = ems_service.test_request()
-    result['this'] = request.client.host
+    result['your_ip'] = request.client.host
     return result
