@@ -1,19 +1,37 @@
 import requests
 import base64
+import os
+
+LAST_CAPTCHA_PATH = 'last_captcha'
+AZCAPTCHA_TOKEN = 'qw97ngfnjdwxktz3rmbhgplpfq2m4zjy'
+
+
+def get_last_captcha_solution():
+    # Get last captcha solution if exists
+    isExist = os.path.exists(LAST_CAPTCHA_PATH)
+    if isExist:
+        with open(LAST_CAPTCHA_PATH, 'r') as f:
+            answer, encoded_key = f.readline().split('||')
+            print('=> Last captcha:', answer, encoded_key)
+            return answer, encoded_key
+    return '', ''
+
+
+def save_captcha_solution(answer, encoded_key):
+    with open(LAST_CAPTCHA_PATH, 'w') as f:
+        f.write('||'.join([answer, encoded_key]))
+        print('=> Captcha solution saved!')
 
 
 def solve_captcha(image_base64):
-    # # Decoding the base64 string
-    # image_data = base64.b64decode(image_base64)
-    # # Saving the image
-    # with open("image.jpg", "wb") as f:
-    #     f.write(image_data)
-
-    az_key = 'qw97ngfnjdwxktz3rmbhgplpfq2m4zjy'
-
+    # Decoding the base64 string
+    image_data = base64.b64decode(image_base64)
+    # Saving the image
+    with open("last_captcha.jpg", "wb") as f:
+        f.write(image_data)
+        
     # Sending captcha solve request
-    print('=> Solving captcha...')
-    payload = {'method': 'base64', 'key': az_key, 'body': image_base64, 'json': 1}
+    payload = {'method': 'base64', 'key': AZCAPTCHA_TOKEN, 'body': image_base64, 'json': 1}
     r = requests.post('http://azcaptcha.com/in.php', data=payload)
     captcha_id = r.json()['request']
     # print(r.text)
@@ -22,7 +40,7 @@ def solve_captcha(image_base64):
     if r.json()['status'] == 1:
         # Loop until getting answer or error
         while True:
-            url = f"http://azcaptcha.com/res.php?key={az_key}&action=get&id={captcha_id}&json=1"
+            url = f"http://azcaptcha.com/res.php?key={AZCAPTCHA_TOKEN}&action=get&id={captcha_id}&json=1"
             r = requests.get(url)
             # print(response.json())
             if r.json()['status'] == 1:
