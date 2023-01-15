@@ -20,31 +20,55 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the dep
 
 
 `pip install -r requirements.txt`
+or
+`pip3 install -r requirements.txt`
 
 Usage
 -----
 
 To run the API on your local machine, use the following command:
 
-
-`uvicorn main:app --reload`
-
-This will run the API on `http://localhost:8000/`
-
-Make a `GET` request to `http://localhost:8000/ems/track?tracking_number={tracking_number}`
-
-Deployment
-----------
-
-To deploy this API on DigitalOcean, you will need to create a droplet and install all the dependencies on the server.
-
-Use the following command to run the API on your droplet:
-
-
-`uvicorn main:app --host 0.0.0.0 --port 8000`
+`uvicorn main:app --host 0.0.0.0 --port 5000`
 
 Make sure to configure your server firewall and DNS settings to allow incoming traffic on port 8000.
 
+This will run the API on `http://localhost:5000/`
+
+Make a `GET` request to `http://localhost:5000/ems/track?tracking_number={tracking_number}`
+
+Deployment with docker
+----------------------
+
+Install docker by following this:
+
+https://docs.docker.com/engine/install/ubuntu/
+
+Install docker-compose
+
+`sudo apt install docker-compose`
+
+
+That's all.
+
+To run the application run the following command:
+`docker-compose up -d`
+
+To check application status:
+`docker ps`
+
+
+**Note**
+In case you updated anything in the code or even access whitelist, you should rebuild and run the application using the following commands:
+- build
+`docker-compose build`
+
+- run
+`docker-compose up -d`
+
+
+
+Deployment with Nginx
+---------------------
 
 To Deploy and work in background using Nginx
 https://dev.to/shuv1824/deploy-fastapi-application-on-ubuntu-with-nginx-gunicorn-and-uvicorn-3mbl

@@ -1,15 +1,20 @@
 import hashlib
 import base64
-import json, random
+import json, random, traceback
 import requests
-from PIL import Image
-from io import BytesIO
+from bs4 import BeautifulSoup
+from GlobalTrack.CaptchaSolver import solve_captcha, save_captcha_solution, get_last_captcha_solution
+
+
+def solve_captcha_challenge(captcha_image):
+    print('=> Solving Captcha Challenge...')
+    answer = solve_captcha(captcha_image)
+    return answer
 
 
 class GlobalTrackingService:
     def __init__(self, proxy=False, session_id=None):
         self.session = requests.Session()
-        self.session.headers['Accept'] = 'application/json, text/plain, */*'
         self.session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
         self.session_id = session_id or random.randint(11111, 99999)
         if proxy:
@@ -19,77 +24,79 @@ class GlobalTrackingService:
                 "https": proxy,
             }
 
-    def solve_captcha_challenge(self, tracking_number):
-        print('=> Solving Captcha Challenge...')
-        while True:
-            # Get the captcha challenge and capcode
-            slidingImage, backImage, capcode = self.get_captcha_challenge()
-
-            # getting captcha image solution
-            xspot = self.get_captcha_challenge_solution(backImage, slidingImage)
-
-            # Submit captcha challenge solution
-            success = self.submit_captcha_challenge_solution(tracking_number, xspot, capcode)
-            if success:
-                print('=> Captcha Challenge Solved!')
-                return xspot, capcode
-            else:
-                print('=> Wrong solution, trying again...')
+    def solve_captcha_challenge(self, captcha_image, payload, force=False):
+        if force:
+            # Solve captcha challenge
+            payload['txtCaptchaCode'] = solve_captcha_challenge(captcha_image)
+        else:
+            # Get last captcha solution
+            captcha_answer, encoded_key = get_last_captcha_solution()
+            payload['txtCaptchaCode'] = captcha_answer
+            payload['txtCaptchaEncCode'] = encoded_key
+        return payload
 
     def get_tracking_result(self, tracking_number):
         print('=> Get Tracking Result:', tracking_number)
+        try:
+            # Get initial request payload
+            r = self.session.get('http://globaltracktrace.ptc.post/gtt.web/Search.aspx')
+            soup = BeautifulSoup(r.text, 'html.parser')
+            payload = {i.get('name'): i.get('value') for i in soup.select('form input')}
+            payload['txtItemID'] = tracking_number
+            encoded_key = payload['txtCaptchaEncCode']
 
-        # Solve captcha challenge
-        xspot, capcode = self.solve_captcha_challenge(tracking_number)
+            # Get captcha image
+            captcha_image = soup.select_one('#imgCaptcha').get('src').split('base64, ')[1]
 
-        # Get the timestamp to generate the ticket
-        timestamp = self.get_timestamp()
+            # Solve captcha challenge using last solution
+            payload = self.solve_captcha_challenge(captcha_image, payload)
 
-        # Generate the ticket for the queryTrack result request
-        secret = '44FC5D74924447C1A9ABC8FD011CF9A0'
-        ticket = self.generate_ticket(tracking_number, timestamp, capcode, secret)
+            while True:
+                # Getting request result
+                r = self.session.post('http://globaltracktrace.ptc.post/gtt.web/Search.aspx', data=payload)
+                soup = BeautifulSoup(r.text, 'html.parser')
+                results = soup.select_one('#resultsPanel')
 
-        # Make the queryTrack result request
-        payload = {
-            "value": [
-                {
-                    "xpos": xspot,
-                    "capcode": capcode,
-                    "mailStatus": "a",
-                    "orderNum": [
-                        tracking_number
-                    ],
-                    "orderType": "1",
-                    "noRulesNum": [],
-                    "appleFlag": None
-                }
-            ],
-            "list": [
-                tracking_number
-            ]
-        }
-        self.session.headers['time'] = timestamp
-        self.session.headers['ticket'] = ticket
-        r = self.session.post('https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack', json=payload)
-        if r.json()['success']:
-            return r.json()
-        else:
-            return json.dumps({'success': False, 'msg': 'Failed'})
+                if results:
+                    print('=> Success results.')
+                    # Save captcha solution
+                    save_captcha_solution(payload['txtCaptchaCode'], payload['txtCaptchaEncCode'])
 
-    def test_request(self):
-        r = self.session.get('https://api.myip.com/')
-        print(r.text)
-        print(self.session_id)
-        res = r.json()
-        res['session_id'] = self.session_id
-        return res
+                    # Remove 'New Search' button
+                    results.select_one('#btnNewSearch').decompose()
+                    return {'success': True, 'html': str(results)}
+                else:
+                    print('=> Failed, trying again...')
+
+                    # Solve captcha challenge using solver service
+                    payload['txtCaptchaEncCode'] = encoded_key
+                    payload = self.solve_captcha_challenge(captcha_image, payload, force=True)
+        except Exception as e:
+            traceback.print_exc()
+            if r.status_code == 407:
+                e = 'Proxy Auth Failed (code: ip_forbidden)'
+            errors_note = {
+                "Proxy Auth Failed (code: ip_forbidden)": 'Your proxy zone is configured with Whitelist IPs permission, and the machine IP (bot) is not part of that list.'
+            }
+            return {'success': False, 'msg': 'Internal Error!', 'error': e, 'notes': errors_note}
+
 
 
 if __name__ == '__main__':
-    ems = GlobalTrackingService(proxy=True)
-    ems.test_request()
-    # result = ems.get_tracking_result('LY932726434CN')
-    # print(result)
-    #
-    # result = ems.get_tracking_result('LV663202155CN')
-    # print(result)
+    service = GlobalTrackingService(proxy=False)
+    result = service.get_tracking_result('EB780555102CN')
+    print(result)
+
+    tracking_numbers = [
+        'LV611586092CN', 'LV617908564CN', 'LV611585684CN', 'RG008482666CN', 'CY012011836CN', 'LV627660811CN',
+        'CY012373804CN', 'LA151249639CN', 'LP582688401CN', 'EV029066604CN', 'LV651582139CN', 'LV663202155CN',
+        'LV651582350CN', 'LV660539880CN', 'LV668750216CN', 'LV668550223CN', 'LV669594781CN', 'LV668077772CN',
+        'LV668077622CN', 'EB780555102CN', 'LR021365770CN', 'LV673862524CN'
+    ]
+
+    for tracking_number in tracking_numbers:
+        result = service.get_tracking_result(tracking_number)
+        print(result)
+        print('='*50)
+
+
