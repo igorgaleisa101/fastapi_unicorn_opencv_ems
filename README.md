@@ -45,6 +45,57 @@ Use the following command to run the API on your droplet:
 
 Make sure to configure your server firewall and DNS settings to allow incoming traffic on port 8000.
 
+
+To Deploy and work in background using Nginx
+https://dev.to/shuv1824/deploy-fastapi-application-on-ubuntu-with-nginx-gunicorn-and-uvicorn-3mbl
+
+`sudo apt update
+ sudo apt install nginx`
+
+Install gunicorn and uvicorn
+
+`pip install gunicorn uvicorn`
+
+
+Configure Nginx
+Now our application is ready to be run and tested. To be able to serve the application over HTTP we have to make an Nginx config for our application.
+
+`sudo vim /etc/nginx/sites-available/myapp`
+
+Put the followings on that file:
+
+`server {
+       server_name <server-ip>;
+       location / {
+           include proxy_params;
+           proxy_pass http://127.0.0.1:8000;
+       }
+}`
+
+Now we save the file and exit. Then we make a symbolic link to this config file in the /etc/nginx/sites-enabled directory.
+`sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/`
+
+Then we restart the Nginx service.
+`sudo systemctl restart nginx.service`
+
+Now we can start our uvicorn server to check if our application is working or not.
+`gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:80`
+
+Using Docker
+------------
+
+Install Docker
+
+https://docs.docker.com/engine/install/ubuntu/
+
+`docker-compose up -d`
+
+`docker images`
+
+`docker ps`
+
+
+
 API Endpoint
 --------
 
