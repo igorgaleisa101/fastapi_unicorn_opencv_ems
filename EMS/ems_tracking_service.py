@@ -1,6 +1,6 @@
 import hashlib
 import base64
-import json, random
+import json, random, traceback
 import requests
 from PIL import Image
 from io import BytesIO
@@ -92,50 +92,62 @@ class EMSTrackingService:
     def get_tracking_result(self, tracking_number):
         print('=> Get Tracking Result:', tracking_number)
 
-        # Solve captcha challenge
-        xspot, capcode = self.solve_captcha_challenge(tracking_number)
+        try:
+            # Solve captcha challenge
+            xspot, capcode = self.solve_captcha_challenge(tracking_number)
 
-        # Get the timestamp to generate the ticket
-        timestamp = self.get_timestamp()
+            # Get the timestamp to generate the ticket
+            timestamp = self.get_timestamp()
 
-        # Generate the ticket for the queryTrack result request
-        secret = '44FC5D74924447C1A9ABC8FD011CF9A0'
-        ticket = self.generate_ticket(tracking_number, timestamp, capcode, secret)
+            # Generate the ticket for the queryTrack result request
+            secret = '44FC5D74924447C1A9ABC8FD011CF9A0'
+            ticket = self.generate_ticket(tracking_number, timestamp, capcode, secret)
 
-        # Make the queryTrack result request
-        payload = {
-            "value": [
-                {
-                    "xpos": xspot,
-                    "capcode": capcode,
-                    "mailStatus": "a",
-                    "orderNum": [
-                        tracking_number
-                    ],
-                    "orderType": "1",
-                    "noRulesNum": [],
-                    "appleFlag": None
-                }
-            ],
-            "list": [
-                tracking_number
-            ]
-        }
-        self.session.headers['time'] = timestamp
-        self.session.headers['ticket'] = ticket
-        r = self.session.post('https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack', json=payload)
-        if r.json()['success']:
-            return r.json()
-        else:
-            return json.dumps({'success': False, 'msg': 'Failed'})
+            # Make the queryTrack result request
+            payload = {
+                "value": [
+                    {
+                        "xpos": xspot,
+                        "capcode": capcode,
+                        "mailStatus": "a",
+                        "orderNum": [
+                            tracking_number
+                        ],
+                        "orderType": "1",
+                        "noRulesNum": [],
+                        "appleFlag": None
+                    }
+                ],
+                "list": [
+                    tracking_number
+                ]
+            }
+            self.session.headers['time'] = timestamp
+            self.session.headers['ticket'] = ticket
+            r = self.session.post('https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack', json=payload)
+            if r.json()['success']:
+                return r.json()
+            else:
+                return json.dumps({'success': False, 'msg': 'Failed'})
+        except requests.exceptions.ProxyError as e:
+            return {'success': False, 'msg': 'Proxy Error!', 'error': str(e)}
+        except Exception as e:
+            traceback.print_exc()
+            return {'success': False, 'msg': 'Internal Error!', 'error': str(e)}
 
     def test_request(self):
-        r = self.session.get('https://api.myip.com/')
-        print(r.text)
-        print(self.session_id)
-        res = r.json()
-        res['session_id'] = self.session_id
-        return res
+        try:
+            r = self.session.get('https://api.myip.com/')
+            print(r.text)
+            print(self.session_id)
+            res = r.json()
+            res['session_id'] = self.session_id
+            return res
+        except requests.exceptions.ProxyError as e:
+            return {'success': False, 'msg': 'Internal Error!', 'error': str(e)}
+        except Exception as e:
+            traceback.print_exc()
+            return {'success': False, 'msg': 'Internal Error!', 'error': str(e)}
 
 
 if __name__ == '__main__':

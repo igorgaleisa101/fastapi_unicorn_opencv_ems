@@ -71,6 +71,8 @@ class GlobalTrackingService:
                     # Solve captcha challenge using solver service
                     payload['txtCaptchaEncCode'] = encoded_key
                     payload = self.solve_captcha_challenge(captcha_image, payload, force=True)
+        except requests.exceptions.ProxyError as e:
+            return {'success': False, 'msg': 'Proxy Error!', 'error': str(e)}
         except Exception as e:
             traceback.print_exc()
             if r.status_code == 407:

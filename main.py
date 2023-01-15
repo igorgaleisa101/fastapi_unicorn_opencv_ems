@@ -22,10 +22,10 @@ async def track_ems(request: Request, tracking_number: str, proxy: int = 0, sess
     if not request.client.host in WHITELIST:
         return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
 
-    # Create an instance of EMSTrackingService
+    # Create an instance of tracking service
     ems_service = EMSTrackingService(proxy=proxy, session_id=session)
 
-    # Get the captcha challenge and capcode
+    # Get the results
     result = ems_service.get_tracking_result(tracking_number)
     return result
 
