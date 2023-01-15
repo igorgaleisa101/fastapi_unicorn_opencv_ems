@@ -1,10 +1,17 @@
-EMS Tracking API
-================
+# Post Tracking API
 
-This is an API for tracking packages sent through EMS (China Post Express Mail Service). It uses FastAPI as the web framework and DigitalOcean for deployment.
 
-Prerequisites
--------------
+This is an API for tracking packages sent through China Post services.
+
+## Supported Post Services
+
+
+-   EMS
+-   Global Track Trace
+
+
+## Prerequisites
+
 
 -   Python 3.6+
 -   FastAPI
@@ -13,57 +20,72 @@ Prerequisites
 -   numpy
 
 
-Installation
-------------
+## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the dependencies.
+### Install the dependencies
 
+> pip install -r requirements.txt
 
-`pip install -r requirements.txt`
 or
-`pip3 install -r requirements.txt`
 
-Usage
------
+> pip3 install -r requirements.txt
 
-To run the API on your local machine, use the following command:
+## Usage
 
-`uvicorn main:app --host 0.0.0.0 --port 5000`
 
-Make sure to configure your server firewall and DNS settings to allow incoming traffic on port 8000.
+To run the API on your local machine, use the following command: 
 
-This will run the API on `http://localhost:5000/`
+> uvicorn main:app --host 0.0.0.0 --port 5000
 
-Make a `GET` request to `http://localhost:5000/ems/track?tracking_number={tracking_number}`
+Make sure to configure your server firewall and DNS settings to allow incoming traffic on port 5000.
+
+This will run the API on:
+
+    http://localhost:5000/
+
+
+Make a `GET` request:
+
+    http://localhost:5000/{service_name}/track?tracking_number={tracking_number}
+
+
+Make a `GET` request with proxy:
+
+    http://localhost:5000/{service_name}/track?tracking_number={tracking_number}&proxy=1
+
 
 Deployment with docker
 ----------------------
 
-Install docker by following this:
+###  Installing docker
 
-https://docs.docker.com/engine/install/ubuntu/
+Follow these instructions [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
-Install docker-compose
+###  Installing docker-compose
 
-`sudo apt install docker-compose`
+> sudo apt install docker-compose
 
 
-That's all.
+###  Build the application image
 
-To run the application run the following command:
-`docker-compose up -d`
+> docker-compose build
 
-To check application status:
-`docker ps`
+###  Start and run the application container
+
+> docker-compose up -d
+
 
 
 **Note**
-In case you updated anything in the code or even access whitelist, you should rebuild and run the application using the following commands:
-- build
-`docker-compose build`
+In case you updated anything in the code or even access whitelist, you should rebuild and rerun the application.
 
-- run
-`docker-compose up -d`
+### Other useful commands:
+
+List all images that are currently stored
+> docker images
+
+List all running containers
+> docker ps
 
 
 
@@ -73,8 +95,10 @@ Deployment with Nginx
 To Deploy and work in background using Nginx
 https://dev.to/shuv1824/deploy-fastapi-application-on-ubuntu-with-nginx-gunicorn-and-uvicorn-3mbl
 
-`sudo apt update
- sudo apt install nginx`
+`sudo apt update`
+
+`sudo apt install nginx`
+
 
 Install gunicorn and uvicorn
 
@@ -87,43 +111,34 @@ Now our application is ready to be run and tested. To be able to serve the appli
 `sudo vim /etc/nginx/sites-available/myapp`
 
 Put the followings on that file:
-
-`server {
+```
+server {
        server_name <server-ip>;
        location / {
            include proxy_params;
            proxy_pass http://127.0.0.1:8000;
        }
-}`
+}
+```
 
 Now we save the file and exit. Then we make a symbolic link to this config file in the /etc/nginx/sites-enabled directory.
 `sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/`
 
 Then we restart the Nginx service.
+
 `sudo systemctl restart nginx.service`
 
 Now we can start our uvicorn server to check if our application is working or not.
+
 `gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:80`
 
-Using Docker
-------------
-
-Install Docker
-
-https://docs.docker.com/engine/install/ubuntu/
-
-`docker-compose up -d`
-
-`docker images`
-
-`docker ps`
 
 
 
 API Endpoint
 --------
 
-`GET /ems/track?tracking_number={tracking_number}`
+> GET /{service_name}/track?tracking_number={tracking_number}
 
 Description
 -----------
