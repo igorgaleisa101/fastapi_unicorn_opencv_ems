@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from EMS.ems_tracking_service import EMSTrackingService
+from starlette.requests import Request
 # from mangum import Mangum
+
 
 
 app = FastAPI()
@@ -22,7 +24,8 @@ async def track_ems(tracking_number: str, proxy: int = 0, session: int = 0):
     return result
 
 @app.get("/test")
-async def test(proxy: int = 0, session: int = 0):
+async def test(request: Request, proxy: int = 0, session: int = 0):
     ems_service = EMSTrackingService(proxy=proxy, session_id=session)
     result = ems_service.test_request()
+    result['this'] = request.client.host
     return result
