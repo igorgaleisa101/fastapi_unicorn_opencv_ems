@@ -28,13 +28,13 @@ Usage
 
 To run the API on your local machine, use the following command:
 
-`uvicorn main:app --host 0.0.0.0 --port 8000`
+`uvicorn main:app --host 0.0.0.0 --port 5000`
 
 Make sure to configure your server firewall and DNS settings to allow incoming traffic on port 8000.
 
-This will run the API on `http://localhost:8000/`
+This will run the API on `http://localhost:5000/`
 
-Make a `GET` request to `http://localhost:8000/ems/track?tracking_number={tracking_number}`
+Make a `GET` request to `http://localhost:5000/ems/track?tracking_number={tracking_number}`
 
 Deployment with docker
 ----------------------
@@ -67,8 +67,8 @@ In case you updated anything in the code or even access whitelist, you should re
 
 
 
-Deployment
-----------
+Deployment with Nginx
+---------------------
 
 To Deploy and work in background using Nginx
 https://dev.to/shuv1824/deploy-fastapi-application-on-ubuntu-with-nginx-gunicorn-and-uvicorn-3mbl
