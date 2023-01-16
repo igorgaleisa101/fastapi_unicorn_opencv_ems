@@ -1,4 +1,4 @@
-# Post Tracking API
+# Post Tracking API v.2.0
 
 
 This is an API for tracking packages sent through China Post services.
@@ -53,16 +53,32 @@ Make a `GET` request with proxy:
     http://localhost:5000/{service_name}/track?tracking_number={tracking_number}&proxy=1
 
 
-Deployment with docker
-----------------------
+## Deployment with docker
 
-###  Installing docker
 
-Follow these instructions [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+###  Installing docker using the repository
 
-###  Installing docker-compose
+ [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
-> sudo apt install docker-compose
+#### 1. Update the apt package index and install packages to allow apt to use a repository over HTTPS:
+
+> sudo apt-get update\
+> sudo apt-get install ca-certificates curl gnupg lsb-release
+
+#### 2. Add Docker’s official GPG key:
+
+> sudo mkdir -p /etc/apt/keyrings\
+> curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+#### 3. Use the following command to set up the repository:
+> echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+#### 4. Grant read permission for the Docker public key file before updating the package index:
+> sudo chmod a+r /etc/apt/keyrings/docker.gpg\
+> sudo apt-get update
+
+#### 5. Install Docker Engine, containerd, and Docker Compose:
+> sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
 
 
 ###  Build the application image
@@ -73,83 +89,35 @@ Follow these instructions [Install Docker Engine on Ubuntu](https://docs.docker.
 
 > docker-compose up -d
 
+###  **NOTE:** If you updated anything in the code or even access whitelist run:
+
+> docker-compose up -d --force
 
 
-**Note**
-In case you updated anything in the code or even access whitelist, you should rebuild and rerun the application.
+## Other useful commands:
 
-### Other useful commands:
+### List all images that are currently stored
 
-List all images that are currently stored
 > docker images
 
-List all running containers
+### List all running containers
+
 > docker ps
 
 
 
-Deployment with Nginx
----------------------
 
-To Deploy and work in background using Nginx
-https://dev.to/shuv1824/deploy-fastapi-application-on-ubuntu-with-nginx-gunicorn-and-uvicorn-3mbl
+## API Endpoint
+### EMS
+> GET /ems/track?tracking_number={tracking_number}&proxy={0 or 1}
 
-`sudo apt update`
-
-`sudo apt install nginx`
+### Global Track
+> GET /globaltracktrace/track?tracking_number={tracking_number}&proxy={0 or 1}
 
 
-Install gunicorn and uvicorn
-
-`pip install gunicorn uvicorn`
-
-
-Configure Nginx
-Now our application is ready to be run and tested. To be able to serve the application over HTTP we have to make an Nginx config for our application.
-
-`sudo vim /etc/nginx/sites-available/myapp`
-
-Put the followings on that file:
-```
-server {
-       server_name <server-ip>;
-       location / {
-           include proxy_params;
-           proxy_pass http://127.0.0.1:8000;
-       }
-}
-```
-
-Now we save the file and exit. Then we make a symbolic link to this config file in the /etc/nginx/sites-enabled directory.
-`sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/`
-
-Then we restart the Nginx service.
-
-`sudo systemctl restart nginx.service`
-
-Now we can start our uvicorn server to check if our application is working or not.
-
-`gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:80`
-
-
-
-
-API Endpoint
---------
-
-> GET /{service_name}/track?tracking_number={tracking_number}
-
-Description
------------
-
-This endpoint allows you to track your EMS package by providing the tracking number. It returns a JSON object containing the tracking information for the package.
-
-Parameters
-----------
+## Parameters
 
 -   `tracking_number`: The tracking number of the package you want to track.
+-   `proxy [optional; default=0]`: Set to 1 if you want to use proxy and 0 if you don't.
 
-Example Request
----------------
 
-`GET /ems/track?tracking_number=LY932726434CN`
