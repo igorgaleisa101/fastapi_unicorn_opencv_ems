@@ -80,6 +80,7 @@ Make a `GET` request with proxy:
 #### 5. Install Docker Engine, containerd, and Docker Compose:
 > sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
 
+## Building and running the application
 
 ###  Build the application image
 
