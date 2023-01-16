@@ -1,9 +1,10 @@
 import requests
 import base64
 import os
+from requests.exceptions import JSONDecodeError
 
 LAST_CAPTCHA_PATH = 'last_captcha'
-AZCAPTCHA_TOKEN = 'qw97ngfnjdwxktz3rmbhgplpfq2m4zjy'
+AZCAPTCHA_TOKEN = 'mgitc1mjcqqlopu2rsl7wyri5kxzehsa'
 
 
 def get_last_captcha_solution():
@@ -24,20 +25,28 @@ def save_captcha_solution(answer, encoded_key):
 
 
 def solve_captcha(image_base64):
+
     # Decoding the base64 string
     image_data = base64.b64decode(image_base64)
     # Saving the image
     with open("last_captcha.jpg", "wb") as f:
         f.write(image_data)
-        
+
     # Sending captcha solve request
     payload = {'method': 'base64', 'key': AZCAPTCHA_TOKEN, 'body': image_base64, 'json': 1}
     r = requests.post('http://azcaptcha.com/in.php', data=payload)
-    captcha_id = r.json()['request']
-    # print(r.text)
+
+    try:
+        # print(r.headers)
+        # print(r.text)
+        res = r.json()
+    except JSONDecodeError as e:
+        raise Exception(f"AZCaptcha Error: {r.text}, {str(e)}" )
+
+    captcha_id = res['request']
 
     # Getting captcha answer
-    if r.json()['status'] == 1:
+    if res['status'] == 1:
         # Loop until getting answer or error
         while True:
             url = f"http://azcaptcha.com/res.php?key={AZCAPTCHA_TOKEN}&action=get&id={captcha_id}&json=1"
@@ -53,6 +62,8 @@ def solve_captcha(image_base64):
             else:
                 print('=> [ERROR]', r.json()['request'])
                 return
+    else:
+        raise ValueError(f"AZCaptcha Error: {r.json()['request']}" )
 
 
 if __name__ == '__main__':
