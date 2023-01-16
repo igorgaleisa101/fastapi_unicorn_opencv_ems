@@ -10,8 +10,7 @@ This is an API for tracking packages sent through China Post services.
 -   Global Track Trace
 
 
-## Prerequisites
-
+## Tech Stack
 
 -   Python 3.6+
 -   FastAPI
