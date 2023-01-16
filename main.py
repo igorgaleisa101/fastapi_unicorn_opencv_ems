@@ -13,7 +13,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "EMS API v1.0"}
+    return {"message": "EMS API v1.1"}
 
 
 @app.get("/ems/track")
