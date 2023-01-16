@@ -36,6 +36,12 @@ class GlobalTrackingService:
     def get_captcha_challenge(self, tracking_number):
         # Get initial request payload
         r = self.session.get('http://globaltracktrace.ptc.post/gtt.web/Search.aspx')
+        # print(r.status_code)
+        # print(r.text)
+
+        # Handle proxy error
+        if r.status_code == 407:
+            raise ProxyError('The server IP is not whitelisted in proxy provider.')
 
         # Get captcha image
         soup = BeautifulSoup(r.text, 'html.parser')
@@ -116,7 +122,7 @@ class GlobalTrackingService:
 
 
 if __name__ == '__main__':
-    service = GlobalTrackingService(proxy=False)
+    service = GlobalTrackingService(proxy=True)
     result = service.get_tracking_result('EB780555102CN')
     print(result)
 

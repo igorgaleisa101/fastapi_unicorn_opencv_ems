@@ -2,6 +2,7 @@ import hashlib
 import base64
 import json, random, traceback
 import requests
+from requests.exceptions import ProxyError
 from PIL import Image
 from io import BytesIO
 from EMS import CaptchaSolver
@@ -37,7 +38,18 @@ class EMSTrackingService:
         return str(r.json()['value'])
 
     def get_captcha_challenge(self):
-        r = self.session.post('https://www.ems.com.cn/ems-web/cutPic/getPic')
+        try:
+            r = self.session.post('https://www.ems.com.cn/ems-web/cutPic/getPic')
+        except ProxyError as e:
+            if 'ip_forbidden' in str(e):
+                raise ProxyError('The server IP is not whitelisted in proxy provider.')
+            else:
+                raise ProxyError(str(e))
+
+        # Handle proxy error
+        if r.status_code == 407:
+            raise ProxyError('The server IP is not whitelisted in proxy provider.')
+
         capcode = r.json()['value']['capcode']
         sliding_image = Image.open(BytesIO(base64.b64decode(r.json()["value"]["slidingImage"])))
         back_image = Image.open(BytesIO(base64.b64decode(r.json()["value"]["backImage"])))
@@ -129,7 +141,8 @@ class EMSTrackingService:
                 return r.json()
             else:
                 return json.dumps({'success': False, 'msg': 'Failed'})
-        except requests.exceptions.ProxyError as e:
+        except ProxyError as e:
+            traceback.print_exc()
             return {'success': False, 'msg': 'Proxy Error!', 'error': str(e)}
         except Exception as e:
             traceback.print_exc()
@@ -143,18 +156,18 @@ class EMSTrackingService:
             res = r.json()
             res['session_id'] = self.session_id
             return res
-        except requests.exceptions.ProxyError as e:
-            return {'success': False, 'msg': 'Internal Error!', 'error': str(e)}
+        except ProxyError as e:
+            return {'success': False, 'msg': 'Proxy Error!', 'error': str(e)}
         except Exception as e:
             traceback.print_exc()
-            return {'success': False, 'msg': 'Internal Error!', 'error': str(e)}
+            return {'success': False, 'msg': 'Internal Error!', 'error': f'{type(e).__name__}: {e.args}'}
 
 
 if __name__ == '__main__':
     ems = EMSTrackingService(proxy=True)
-    ems.test_request()
-    # result = ems.get_tracking_result('LY932726434CN')
-    # print(result)
+    # ems.test_request()
+    result = ems.get_tracking_result('LY932726434CN')
+    print(result)
     #
     # result = ems.get_tracking_result('LV663202155CN')
     # print(result)
