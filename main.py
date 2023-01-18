@@ -12,12 +12,12 @@ app = FastAPI()
 
 
 @app.get("/")
-async def root():
+def root():
     return {"message": "EMS API v2.0"}
 
 
 @app.get("/ems/track")
-async def track_ems(request: Request, tracking_number: str, proxy: int = 0, session: int = 0):
+def track_ems(request: Request, tracking_number: str, proxy: int = 0, session: int = 0):
     # Check access
     if not request.client.host in WHITELIST:
         return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
@@ -31,7 +31,7 @@ async def track_ems(request: Request, tracking_number: str, proxy: int = 0, sess
 
 
 @app.get("/globaltracktrace/track")
-async def global_track_trace(request: Request, tracking_number: str, proxy: int = 0, session: int = 0):
+def global_track_trace(request: Request, tracking_number: str, proxy: int = 0, session: int = 0):
     # Check access
     if not request.client.host in WHITELIST:
         return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
@@ -45,7 +45,7 @@ async def global_track_trace(request: Request, tracking_number: str, proxy: int 
 
 
 @app.get("/test")
-async def test(request: Request, proxy: int = 0, session: int = 0):
+def test(request: Request, proxy: int = 0, session: int = 0):
     # Check access
     if not request.client.host in WHITELIST:
         return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
