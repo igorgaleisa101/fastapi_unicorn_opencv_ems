@@ -16,8 +16,8 @@ def root():
     return {"message": "EMS API v2.0"}
 
 
-@app.get("/ems/{lang}/track")
-def track_ems(request: Request, tracking_number: str, lang: str, proxy: int = 0):
+@app.get("/ems/track")
+def track_ems(request: Request, tracking_number: str, proxy: int = 0, lang: str = 'en'):
     # Check access
     if not request.client.host in WHITELIST:
         return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
