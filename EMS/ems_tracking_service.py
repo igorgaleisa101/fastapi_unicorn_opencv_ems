@@ -119,13 +119,12 @@ class EMSTrackingService:
             ENGLISH_KEY = '44FC5D74924447C1A9ABC8FD011CF9A0'
             CHINESE_KEY = '053B245CB1B74EBBB5FBB4A5889D66B8'
 
-            print(self.lang.upper())
-            if self.lang.upper() == 'EN':
-                secret = ENGLISH_KEY
-                query_track_url = 'https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack'
-            elif self.lang.upper() == 'CN':
+            if self.lang.upper() == 'CN':
                 secret = CHINESE_KEY
                 query_track_url = 'https://www.ems.com.cn/ems-web/mailTrack/queryTrack'
+            else:
+                secret = ENGLISH_KEY
+                query_track_url = 'https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack'
 
             ticket = self.generate_ticket(tracking_number, timestamp, capcode, secret)
 
