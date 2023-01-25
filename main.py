@@ -16,7 +16,7 @@ def root():
     return {"message": "EMS API v2.0"}
 
 
-@app.get("/ems/track")
+@app.get("/ems/{lang}/track")
 def track_ems(request: Request, tracking_number: str, lang: str, proxy: int = 0):
     # Check access
     if not request.client.host in WHITELIST:
