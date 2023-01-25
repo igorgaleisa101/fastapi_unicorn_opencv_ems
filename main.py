@@ -17,13 +17,13 @@ def root():
 
 
 @app.get("/ems/track")
-def track_ems(request: Request, tracking_number: str, proxy: int = 0, session: int = 0):
+def track_ems(request: Request, tracking_number: str, proxy: int = 0, lang: str = 'en'):
     # Check access
     if not request.client.host in WHITELIST:
         return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
 
     # Create an instance of tracking service
-    ems_service = EMSTrackingService(proxy=proxy, session_id=session)
+    ems_service = EMSTrackingService(proxy=proxy, lang=lang)
 
     # Get the results
     result = ems_service.get_tracking_result(tracking_number)
