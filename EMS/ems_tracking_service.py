@@ -9,7 +9,7 @@ from EMS import CaptchaSolver
 
 
 class EMSTrackingService:
-    def __init__(self, proxy=False, session_id=None, lang='cn'):
+    def __init__(self, proxy=False, session_id=None, lang='en'):
         self.session = requests.Session()
         self.session.headers['Accept'] = 'application/json, text/plain, */*'
         self.session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
@@ -119,6 +119,7 @@ class EMSTrackingService:
             ENGLISH_KEY = '44FC5D74924447C1A9ABC8FD011CF9A0'
             CHINESE_KEY = '053B245CB1B74EBBB5FBB4A5889D66B8'
 
+            print(self.lang.upper())
             if self.lang.upper() == 'EN':
                 secret = ENGLISH_KEY
                 query_track_url = 'https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack'
