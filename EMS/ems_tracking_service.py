@@ -9,11 +9,16 @@ from EMS import CaptchaSolver
 
 
 class EMSTrackingService:
-    def __init__(self, proxy=False, session_id=None):
+    def __init__(self, proxy=False, session_id=None, lang='en'):
+        print(proxy, lang)
         self.session = requests.Session()
         self.session.headers['Accept'] = 'application/json, text/plain, */*'
         self.session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+        self.session.headers['Origin'] = 'https://www.ems.com.cn'
+        self.session.headers['Host'] = 'www.ems.com.cn'
+        self.session.headers['Referer'] = 'https://www.ems.com.cn/qps/yjcx/'
         self.session_id = session_id or random.randint(11111, 99999)
+        self.lang = lang
         if proxy:
             proxy = "https://lum-customer-osoyoo-zone-static-session-{}:sqtmcnel76x9@zproxy.lum-superproxy.io:22225".format(self.session_id)
             self.session.proxies = {
@@ -112,13 +117,23 @@ class EMSTrackingService:
             timestamp = self.get_timestamp()
 
             # Generate the ticket for the queryTrack result request
-            secret = '44FC5D74924447C1A9ABC8FD011CF9A0'
+            ENGLISH_KEY = '44FC5D74924447C1A9ABC8FD011CF9A0'
+            CHINESE_KEY = '053B245CB1B74EBBB5FBB4A5889D66B8'
+
+            if self.lang.upper() == 'CN':
+                secret = CHINESE_KEY
+                query_track_url = 'https://www.ems.com.cn/ems-web/mailTrack/queryTrack'
+            else:
+                secret = ENGLISH_KEY
+                query_track_url = 'https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack'
+
             ticket = self.generate_ticket(tracking_number, timestamp, capcode, secret)
 
             # Make the queryTrack result request
             payload = {
                 "value": [
                     {
+                        "ip": "0.0.0.0",
                         "xpos": xspot,
                         "capcode": capcode,
                         "mailStatus": "a",
@@ -136,10 +151,11 @@ class EMSTrackingService:
             }
             self.session.headers['time'] = timestamp
             self.session.headers['ticket'] = ticket
-            r = self.session.post('https://www.ems.com.cn/ems-web/cutPicEnglish/queryTrack', json=payload)
+            r = self.session.post(query_track_url, json=payload)
             if r.json()['success']:
                 return r.json()
             else:
+                print(r.text)
                 return json.dumps({'success': False, 'msg': 'Failed'})
         except ProxyError as e:
             traceback.print_exc()
@@ -164,10 +180,18 @@ class EMSTrackingService:
 
 
 if __name__ == '__main__':
-    ems = EMSTrackingService(proxy=True)
+    ems = EMSTrackingService(proxy=False, lang='cn')
     # ems.test_request()
+    # secrets = '1163FA15CC9A425EA4B65B2A218FF5F8', '44FC5D74924447C1A9ABC8FD011CF9A0', '053B245CB1B74EBBB5FBB4A5889D66B8'
+    # for secret in secrets:
+    #     print(ems.generate_ticket('LV663202155CN', '1674483219680', '2810f2a3196041cf9cf1a8686adb7a8b20230123', secret), secret)
+    # print(ems.generate_ticket('LV626850690CN ', '1674465510400', '417a238a7e874f0d96f711b8fb6279c920230123', secret))
+
     result = ems.get_tracking_result('LY932726434CN')
     print(result)
-    #
+
+    result = ems.get_tracking_result('LY932726434CN')
+    print(result)
+
     # result = ems.get_tracking_result('LV663202155CN')
     # print(result)
