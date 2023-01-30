@@ -1,6 +1,12 @@
 version: '3'
 services:
+  splash:
+    image: scrapinghub/splash
+    ports:
+      - "8050:8050"
   app:
+    depends_on:
+      - splash
     build: .
     container_name: 'post-api-container'
     ports:
