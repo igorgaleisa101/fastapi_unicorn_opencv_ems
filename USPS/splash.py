@@ -20,7 +20,7 @@ class Splash:
             script = f.read()
 
         # Run lua script to get render and get cookies
-        r = self.session.post(f'http://localhost:8050/run', json={
+        r = self.session.post(f'http://127.0.0.1:8050/run', json={
             'lua_source': script,
             'url': 'https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=xyz'
         })
