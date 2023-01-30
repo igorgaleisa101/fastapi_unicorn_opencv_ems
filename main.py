@@ -48,8 +48,8 @@ def global_track_trace(request: Request, tracking_number: str, proxy: int = 0, s
 @app.get("/usps/track")
 def usps(request: Request, tracking_number: str, proxy: int = 0):
     # Check access
-    # if not request.client.host in WHITELIST:
-    #     return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
+    if not request.client.host in WHITELIST:
+        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
 
     # Create an instance of tracking service
     service = USPSTrackingService(proxy=proxy)
