@@ -33,7 +33,7 @@ def protected(func):
     def wrapper(request: Request, *args, **kwargs):
         if request.client.host not in resolve_ip_list(WHITELIST):
             return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
-        return await func(request, *args, **kwargs)
+        return func(request, *args, **kwargs)
 
     return wrapper
 
