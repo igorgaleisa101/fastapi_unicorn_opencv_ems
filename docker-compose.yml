@@ -1,9 +1,15 @@
 version: '3'
 services:
   splash:
-    image: scrapinghub/splash
+    image: scrapinghub/splash:master
+    container_name: 'post-splash-container'
     ports:
       - "8050:8050"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G
   app:
     depends_on:
       - splash
@@ -11,6 +17,7 @@ services:
     container_name: 'post-api-container'
     ports:
       - "5000:5000"
+    restart: on-failure
     volumes:
       - .:/app
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
