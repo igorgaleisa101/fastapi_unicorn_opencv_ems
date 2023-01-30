@@ -12,14 +12,6 @@ from USPS.usps_track_service import USPSTrackingService
 app = FastAPI()
 
 
-# handler = Mangum(app)
-
-
-@app.get("/")
-def root():
-    return {"message": "EMS API v2.0"}
-
-
 # Custom decorator to check whitelist
 def protected(func):
     @wraps(func)
@@ -29,6 +21,11 @@ def protected(func):
         return func(request, *args, **kwargs)
 
     return wrapper
+
+
+@app.get("/")
+def root():
+    return {"message": "EMS API v2.0"}
 
 
 @app.get("/ems/track")
@@ -67,6 +64,7 @@ def usps(request: Request, tracking_number: str, proxy: int = 0):
 @app.get("/whitelist")
 def whitelist(request: Request):
     return resolve_ip_list(WHITELIST)
+
 
 @app.get("/test")
 @protected
