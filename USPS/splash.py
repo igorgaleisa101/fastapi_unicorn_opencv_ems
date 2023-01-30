@@ -6,17 +6,17 @@ from requests_html import HTMLSession
 
 class Splash:
     COOKIES_PATH = 'usps_cookies.pickle'
+    CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 
     def __init__(self):
         self.session = HTMLSession()
         self.load_cookies()
-        self.current_path = os.path.dirname(os.path.abspath(__file__))
 
     def update_session_cookies(self):
         print('=> [USPS] Updating cookies using splash...')
         # lua script render html and wait until result element to be exist
 
-        with open(os.path.join(self.current_path, 'lua_scripts/get_cookies.lua'), 'r') as f:
+        with open(os.path.join(self.CURRENT_PATH, 'lua_scripts/get_cookies.lua'), 'r') as f:
             script = f.read()
 
         # Run lua script to get render and get cookies
@@ -40,12 +40,12 @@ class Splash:
 
     def save_cookies(self, cookies):
         print('=> [USPS] Saving cookies...')
-        with open(os.path.join(self.current_path, self.COOKIES_PATH), 'wb') as f:
+        with open(os.path.join(self.CURRENT_PATH, self.COOKIES_PATH), 'wb') as f:
             pickle.dump(cookies, f)
 
     def load_cookies(self):
         try:
-            with open(os.path.join(self.current_path, self.COOKIES_PATH), 'rb') as f:
+            with open(os.path.join(self.CURRENT_PATH, self.COOKIES_PATH), 'rb') as f:
                 self.session.cookies = pickle.load(f)
         except FileNotFoundError:
             print('=> [USPS] Warning: Cookies file not exist.')
