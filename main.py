@@ -1,3 +1,4 @@
+from functools import wraps
 from fastapi import FastAPI
 from starlette.requests import Request
 from access import WHITELIST
@@ -21,11 +22,20 @@ def root():
 
 def check_whitelist(func):
     def wrapper(request: Request, *args, **kwargs):
-        if request.client.host not in resolve_ip_list(WHITELIST):
+        if request.client.host not in WHITELIST:
             return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
         return func(request, *args, **kwargs)
     return wrapper
 
+# Custom decorator to check whitelist
+def protected(func):
+    @wraps(func)
+    async def wrapper(request: Request, *args, **kwargs):
+        if request.client.host not in WHITELIST:
+            return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
+        return await func(*args, **kwargs)
+
+    return wrapper
 
 @app.get("/ems/track")
 def track_ems(request: Request, tracking_number: str, proxy: int = 0, lang: str = 'en'):
@@ -70,12 +80,15 @@ def usps(request: Request, tracking_number: str, proxy: int = 0):
 
 
 @app.get("/whitelist")
-@check_whitelist
-def whitelist():
+@protected
+def whitelist(request: Request):
+    # Check access
+    if not request.client.host in resolve_ip_list(WHITELIST):
+        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
     return WHITELIST
 
 @app.get("/test")
-@check_whitelist
+@protected
 def test(request: Request, proxy: int = 0, session: int = 0):
     ems_service = EMSTrackingService(proxy=proxy, session_id=session)
     result = ems_service.test_request()
