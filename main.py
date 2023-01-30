@@ -30,10 +30,10 @@ def check_whitelist(func):
 # Custom decorator to check whitelist
 def protected(func):
     @wraps(func)
-    async def wrapper(request: Request, *args, **kwargs):
+    def wrapper(request: Request, *args, **kwargs):
         if request.client.host not in resolve_ip_list(WHITELIST):
             return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
-        return await func(*args, **kwargs)
+        return await func(request, *args, **kwargs)
 
     return wrapper
 
