@@ -20,13 +20,6 @@ def root():
     return {"message": "EMS API v2.0"}
 
 
-def check_whitelist(func):
-    def wrapper(request: Request, *args, **kwargs):
-        if request.client.host not in WHITELIST:
-            return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
-        return func(request, *args, **kwargs)
-    return wrapper
-
 # Custom decorator to check whitelist
 def protected(func):
     @wraps(func)
@@ -37,12 +30,10 @@ def protected(func):
 
     return wrapper
 
-@app.get("/ems/track")
-def track_ems(request: Request, tracking_number: str, proxy: int = 0, lang: str = 'en'):
-    # Check access
-    if not request.client.host in WHITELIST:
-        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
 
+@app.get("/ems/track")
+@protected
+def track_ems(request: Request, tracking_number: str, proxy: int = 0, lang: str = 'en'):
     # Create an instance of tracking service
     ems_service = EMSTrackingService(proxy=proxy, lang=lang)
 
@@ -52,11 +43,8 @@ def track_ems(request: Request, tracking_number: str, proxy: int = 0, lang: str 
 
 
 @app.get("/globaltracktrace/track")
+@protected
 def global_track_trace(request: Request, tracking_number: str, proxy: int = 0, session: int = 0):
-    # Check access
-    if not request.client.host in WHITELIST:
-        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
-
     # Create an instance of tracking service
     service = GlobalTrackingService(proxy=proxy, session_id=session)
 
@@ -66,11 +54,8 @@ def global_track_trace(request: Request, tracking_number: str, proxy: int = 0, s
 
 
 @app.get("/usps/track")
+@protected
 def usps(request: Request, tracking_number: str, proxy: int = 0):
-    # Check access
-    if not request.client.host in WHITELIST:
-        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
-
     # Create an instance of tracking service
     service = USPSTrackingService(proxy=proxy)
 
@@ -80,7 +65,6 @@ def usps(request: Request, tracking_number: str, proxy: int = 0):
 
 
 @app.get("/whitelist")
-@protected
 def whitelist(request: Request):
     # Check access
     if not request.client.host in resolve_ip_list(WHITELIST):
