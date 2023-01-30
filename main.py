@@ -66,10 +66,7 @@ def usps(request: Request, tracking_number: str, proxy: int = 0):
 
 @app.get("/whitelist")
 def whitelist(request: Request):
-    # Check access
-    if not request.client.host in resolve_ip_list(WHITELIST):
-        return {'success': False, 'msg': 'Access Denied!', 'your_ip': request.client.host}
-    return WHITELIST
+    return resolve_ip_list(WHITELIST)
 
 @app.get("/test")
 @protected
