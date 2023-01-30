@@ -1,4 +1,4 @@
-# Post Tracking API v.2.0
+# Post Tracking API v.3.0
 
 
 This is an API for tracking packages sent through China Post services.
@@ -8,6 +8,7 @@ This is an API for tracking packages sent through China Post services.
 
 -   EMS
 -   Global Track Trace
+-   USPS
 
 
 ## Tech Stack
@@ -114,6 +115,9 @@ Make a `GET` request with proxy:
 
 ### Global Track
 > GET /globaltracktrace/track?tracking_number={tracking_number}&proxy={0 or 1}
+
+### USPS
+> GET /usps/track?tracking_number={tracking_number}&proxy={0 or 1}
 
 
 ## Parameters
