@@ -20,7 +20,7 @@ class EMSTrackingService:
         self.session_id = session_id or random.randint(11111, 99999)
         self.lang = lang
         if proxy:
-            proxy = "https://lum-customer-osoyoo-zone-static-session-{}:sqtmcnel76x9@zproxy.lum-superproxy.io:22225".format(self.session_id)
+            proxy = "https://lum-customer-osoyoo-zone-static-session-{}:***:22225".format(self.session_id)
             self.session.proxies = {
                 "http": proxy,
                 "https": proxy,
